@@ -1,0 +1,421 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.db-wrap{background:var(--color-background-tertiary);min-height:100vh;padding:0}
+.topbar{background:#1a3a5c;color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.logo{font-size:15px;font-weight:500;letter-spacing:.3px}
+.topbar-tabs{display:flex;gap:2px}
+.tab{padding:5px 12px;font-size:12px;cursor:pointer;border-radius:4px;color:rgba(255,255,255,.7);border:none;background:transparent}
+.tab.active{background:rgba(255,255,255,.18);color:#fff;font-weight:500}
+.tab:hover:not(.active){background:rgba(255,255,255,.1);color:#fff}
+.filters{background:#f0f3f7;border-bottom:1px solid #d0d8e4;padding:7px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.filter-group{display:flex;align-items:center;gap:6px}
+.filter-label{font-size:11px;color:#555;font-weight:500}
+select{font-size:11px;padding:3px 8px;border:1px solid #ccd0d8;border-radius:4px;background:#fff;color:#333;cursor:pointer}
+.main{padding:12px 14px}
+.section-title{font-size:12px;font-weight:500;color:#1a3a5c;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #1a3a5c;display:inline-block}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.kpi{background:#fff;border:1px solid #dde3ee;border-radius:6px;padding:10px 12px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
+.kpi.blue::before{background:#1a6bb5}
+.kpi.green::before{background:#1a7a4a}
+.kpi.amber::before{background:#c07010}
+.kpi.red::before{background:#b03030}
+.kpi-label{font-size:10px;color:#777;margin-bottom:3px}
+.kpi-value{font-size:20px;font-weight:500;color:#1a3a5c;line-height:1}
+.kpi-sub{font-size:10px;margin-top:3px}
+.kpi-sub.up{color:#1a7a4a}
+.kpi-sub.down{color:#b03030}
+.charts-row{display:grid;grid-template-columns:1.4fr 1fr;gap:10px;margin-bottom:14px}
+.chart-card{background:#fff;border:1px solid #dde3ee;border-radius:6px;padding:12px}
+.chart-card.full{grid-column:1/-1}
+.card-title{font-size:11px;font-weight:500;color:#333;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.card-title span{font-size:10px;color:#888;font-weight:400}
+.charts-row2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.leg-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--color-text-secondary)}
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.district-table{width:100%;font-size:11px;border-collapse:collapse}
+.district-table th{text-align:left;padding:5px 8px;background:#f0f3f7;color:#555;font-weight:500;border-bottom:1px solid #dde3ee}
+.district-table td{padding:5px 8px;border-bottom:1px solid #f0f3f7;color:#333}
+.district-table tr:hover td{background:#f8fafd}
+.badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:500}
+.badge.good{background:#d4f0e0;color:#1a6a3a}
+.badge.mod{background:#ffeacc;color:#965500}
+.badge.bad{background:#fdd;color:#b03030}
+.badge.online{background:#d4f0e0;color:#1a6a3a}
+.badge.offline{background:#fdd;color:#b03030}
+.mini-bar-wrap{display:flex;align-items:center;gap:6px}
+.mini-bar-bg{flex:1;height:6px;background:#eee;border-radius:3px;overflow:hidden}
+.mini-bar-fill{height:100%;border-radius:3px}
+.donut-wrap{display:flex;align-items:center;gap:12px}
+.bottom-row{display:grid;grid-template-columns:1.2fr 1fr;gap:10px}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f0f3f7}
+.stat-row:last-child{border-bottom:none}
+.stat-label{font-size:11px;color:#555}
+.stat-val{font-size:11px;font-weight:500;color:#1a3a5c}
+</style>
+<div class="db-wrap">
+<div class="topbar">
+  <div class="topbar-left">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="1" y="10" width="4" height="9" fill="#4fc3f7"/><rect x="7" y="6" width="4" height="13" fill="#81d4fa"/><rect x="13" y="2" width="4" height="17" fill="#b3e5fc"/><rect x="1" y="1" width="18" height="1.5" fill="#4fc3f7"/></svg>
+    <span class="logo">Smart City Analysis Dashboard</span>
+  </div>
+  <div class="topbar-tabs">
+    <button class="tab active" onclick="switchTab('overview',this)">Overview</button>
+    <button class="tab" onclick="switchTab('air',this)">Air Quality</button>
+    <button class="tab" onclick="switchTab('traffic',this)">Traffic</button>
+    <button class="tab" onclick="switchTab('energy',this)">Energy</button>
+    <button class="tab" onclick="switchTab('safety',this)">Safety</button>
+  </div>
+  <div style="font-size:11px;color:rgba(255,255,255,.6)">Apr 2026 &nbsp;|&nbsp; Live Simulation</div>
+</div>
+
+<div class="filters">
+  <div class="filter-group"><span class="filter-label">Year</span>
+    <select id="f-year" onchange="updateDash()"><option>All Years</option><option>2022</option><option>2023</option><option selected>2024</option></select></div>
+  <div class="filter-group"><span class="filter-label">Month</span>
+    <select id="f-month" onchange="updateDash()"><option>All Months</option><option>Jan</option><option>Feb</option><option>Mar</option><option>Apr</option><option>May</option><option>Jun</option><option>Jul</option><option>Aug</option><option>Sep</option><option>Oct</option><option>Nov</option><option>Dec</option></select></div>
+  <div class="filter-group"><span class="filter-label">District</span>
+    <select id="f-district" onchange="updateDash()"><option>All Districts</option><option>North Zone</option><option>South Zone</option><option>East Zone</option><option>West Zone</option><option>Central Zone</option><option>Industrial Zone</option><option>Tech Park</option><option>Harbor Area</option></select></div>
+  <div class="filter-group"><span class="filter-label">Sector</span>
+    <select id="f-sector" onchange="updateDash()"><option>All Sectors</option><option>Residential</option><option>Commercial</option><option>Industrial</option><option>Government</option><option>Transport</option></select></div>
+</div>
+
+<div class="main">
+  <div id="tab-overview">
+    <div class="kpi-row">
+      <div class="kpi blue"><div class="kpi-label">Avg AQI</div><div class="kpi-value" id="k-aqi">142</div><div class="kpi-sub down" id="k-aqi-s">▲ Moderate — check filters</div></div>
+      <div class="kpi green"><div class="kpi-label">Energy Saved (MWh)</div><div class="kpi-value" id="k-energy">8,420</div><div class="kpi-sub up">▲ 12% vs prior period</div></div>
+      <div class="kpi amber"><div class="kpi-label">Traffic Congestion</div><div class="kpi-value" id="k-cong">0.58</div><div class="kpi-sub down">▼ Peak hours impact</div></div>
+      <div class="kpi red"><div class="kpi-label">Safety Incidents</div><div class="kpi-value" id="k-inc">1,240</div><div class="kpi-sub up">▼ 8% resolved faster</div></div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="card-title">Monthly AQI Trend by District <span id="aqi-subtitle">2024</span></div>
+        <div style="position:relative;height:200px"><canvas id="aqiChart" role="img" aria-label="Monthly AQI line chart by district">AQI trend data across districts over months.</canvas></div>
+        <div class="legend" id="aqi-legend"></div>
+      </div>
+      <div class="chart-card">
+        <div class="card-title">Energy by Sector <span>kWh distribution</span></div>
+        <div class="donut-wrap">
+          <div style="position:relative;height:160px;width:160px;flex-shrink:0"><canvas id="energyDonut" role="img" aria-label="Donut chart of energy consumption by sector">Residential, Commercial, Industrial, Government, Transport sectors.</canvas></div>
+          <div class="legend" id="donut-legend"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="charts-row2">
+      <div class="chart-card">
+        <div class="card-title">Traffic Volume by Month <span>vehicles/day</span></div>
+        <div style="position:relative;height:160px"><canvas id="trafficBar" role="img" aria-label="Bar chart showing traffic volume by month">Monthly vehicle traffic volumes.</canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="card-title">Water: Supply vs Demand <span>KL (thousand litres)</span></div>
+        <div style="position:relative;height:160px"><canvas id="waterChart" role="img" aria-label="Line chart comparing water supply vs demand">Water supply and demand comparison.</canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="card-title">Waste Recycling Rate <span>% by district</span></div>
+        <div style="position:relative;height:160px"><canvas id="wasteChart" role="img" aria-label="Horizontal bar chart of recycling rate per district">Recycling rates across districts.</canvas></div>
+      </div>
+    </div>
+
+    <div class="bottom-row">
+      <div class="chart-card">
+        <div class="card-title">District Performance Summary</div>
+        <table class="district-table">
+          <thead><tr><th>District</th><th>AQI</th><th>Safety</th><th>Congestion</th><th>Status</th></tr></thead>
+          <tbody id="districtTable"></tbody>
+        </table>
+      </div>
+      <div class="chart-card">
+        <div class="card-title">IoT Sensor Health</div>
+        <div id="iot-stats"></div>
+        <div style="position:relative;height:130px;margin-top:8px"><canvas id="iotChart" role="img" aria-label="Bar chart of IoT sensor status by type">IoT sensor status distribution by type.</canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-air" style="display:none">
+    <div class="kpi-row">
+      <div class="kpi blue"><div class="kpi-label">Avg AQI (City)</div><div class="kpi-value">142</div><div class="kpi-sub down">Moderate — Action Needed</div></div>
+      <div class="kpi red"><div class="kpi-label">PM2.5 µg/m³</div><div class="kpi-value">62.4</div><div class="kpi-sub down">▲ Above WHO limit</div></div>
+      <div class="kpi amber"><div class="kpi-label">NO2 µg/m³</div><div class="kpi-value">38.1</div><div class="kpi-sub">Acceptable range</div></div>
+      <div class="kpi green"><div class="kpi-label">Good AQI Days</div><div class="kpi-value">47%</div><div class="kpi-sub up">▲ +5% YoY</div></div>
+    </div>
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="card-title">AQI Distribution by District <span>All months</span></div>
+        <div style="position:relative;height:220px"><canvas id="aqiDistBar" role="img" aria-label="Bar chart of AQI by district">AQI values across all city districts.</canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="card-title">Pollutant Breakdown <span>City average µg/m³</span></div>
+        <div style="position:relative;height:220px"><canvas id="pollChart" role="img" aria-label="Radar chart of pollutant levels">Pollutant radar: PM2.5, PM10, NO2, CO2.</canvas></div>
+      </div>
+    </div>
+    <div class="chart-card full" style="margin-bottom:10px">
+      <div class="card-title">Monthly AQI Heatmap — All Districts</div>
+      <div id="aqiHeatmap"></div>
+    </div>
+  </div>
+
+  <div id="tab-traffic" style="display:none">
+    <div class="kpi-row">
+      <div class="kpi blue"><div class="kpi-label">Avg Daily Volume</div><div class="kpi-value">24,800</div><div class="kpi-sub up">vehicles/road</div></div>
+      <div class="kpi amber"><div class="kpi-label">Avg Speed</div><div class="kpi-value">42 km/h</div><div class="kpi-sub down">▼ 6km/h vs last yr</div></div>
+      <div class="kpi red"><div class="kpi-label">Total Accidents</div><div class="kpi-value">3,840</div><div class="kpi-sub up">▼ 4% resolved</div></div>
+      <div class="kpi green"><div class="kpi-label">Congestion Index</div><div class="kpi-value">0.58</div><div class="kpi-sub">0=free, 1=gridlock</div></div>
+    </div>
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="card-title">Congestion Index by Month <span>all districts avg</span></div>
+        <div style="position:relative;height:200px"><canvas id="congChart" role="img" aria-label="Line chart of congestion index by month">Monthly congestion index trend.</canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="card-title">Accidents by District <span>annual total</span></div>
+        <div style="position:relative;height:200px"><canvas id="accChart" role="img" aria-label="Bar chart of accident count by district">Accidents per district.</canvas></div>
+      </div>
+    </div>
+    <div class="chart-card full" style="margin-bottom:10px">
+      <div class="card-title">Traffic Volume vs Speed — Scatter Plot <span>by district</span></div>
+      <div style="position:relative;height:220px"><canvas id="scatterChart" role="img" aria-label="Scatter chart of traffic volume vs average speed">Volume vs speed correlation per district.</canvas></div>
+    </div>
+  </div>
+
+  <div id="tab-energy" style="display:none">
+    <div class="kpi-row">
+      <div class="kpi blue"><div class="kpi-label">Total Consumption</div><div class="kpi-value">2.4 GWh</div><div class="kpi-sub down">▲ 3% YoY</div></div>
+      <div class="kpi green"><div class="kpi-label">Solar Generated</div><div class="kpi-value">480 MWh</div><div class="kpi-sub up">▲ 18% YoY</div></div>
+      <div class="kpi amber"><div class="kpi-label">Avg Unit Cost</div><div class="kpi-value">$0.082</div><div class="kpi-sub">per kWh</div></div>
+      <div class="kpi green"><div class="kpi-label">Cost Savings</div><div class="kpi-value">$39,200</div><div class="kpi-sub up">▲ Solar offset</div></div>
+    </div>
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="card-title">Monthly Energy Consumption <span>kWh by sector</span></div>
+        <div style="position:relative;height:200px"><canvas id="energyStack" role="img" aria-label="Stacked bar chart of energy consumption by sector per month">Monthly energy by sector.</canvas></div>
+        <div class="legend" id="energy-legend"></div>
+      </div>
+      <div class="chart-card">
+        <div class="card-title">Solar vs Grid Consumption <span>monthly trend</span></div>
+        <div style="position:relative;height:200px"><canvas id="solarChart" role="img" aria-label="Area chart comparing solar and grid energy monthly">Solar generation vs grid consumption.</canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-safety" style="display:none">
+    <div class="kpi-row">
+      <div class="kpi blue"><div class="kpi-label">Total Incidents</div><div class="kpi-value">3,600</div><div class="kpi-sub">across all districts</div></div>
+      <div class="kpi green"><div class="kpi-label">Resolution Rate</div><div class="kpi-value">62%</div><div class="kpi-sub up">▲ 5% improvement</div></div>
+      <div class="kpi amber"><div class="kpi-label">Avg Response Time</div><div class="kpi-value">16.4 min</div><div class="kpi-sub">▼ 2 min faster</div></div>
+      <div class="kpi green"><div class="kpi-label">Avg Safety Score</div><div class="kpi-value">68.2</div><div class="kpi-sub up">▲ +3.1 pts</div></div>
+    </div>
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="card-title">Safety Score by District <span>higher = safer</span></div>
+        <div style="position:relative;height:220px"><canvas id="safetyBar" role="img" aria-label="Horizontal bar chart of safety scores by district">Safety scores per district.</canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="card-title">Incidents vs Resolution <span>monthly trend</span></div>
+        <div style="position:relative;height:220px"><canvas id="incChart" role="img" aria-label="Dual line chart of incidents and resolutions per month">Monthly incidents and resolution rate.</canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const districts=['North Zone','South Zone','East Zone','West Zone','Central Zone','Industrial Zone','Old City','Tech Park','Harbor Area','Airport Zone'];
+const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const sectors=['Residential','Commercial','Industrial','Government','Transport'];
+const colors=['#1a6bb5','#1a7a4a','#c07010','#8b1a8b','#b03030','#1a7a7a','#6a5a1a','#4a3ab0','#8b4a1a','#1a5a3a'];
+const sectorColors=['#1a6bb5','#c07010','#b03030','#1a7a4a','#8b1a8b'];
+
+function rnd(min,max){return Math.round(min+Math.random()*(max-min))}
+function rndf(min,max,d=1){return parseFloat((min+Math.random()*(max-min)).toFixed(d))}
+
+let charts={};
+function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id]}}
+
+function buildOverview(){
+  destroyChart('aqiChart');
+  const ctx=document.getElementById('aqiChart');
+  const datasets=districts.slice(0,5).map((d,i)=>({
+    label:d, data:months.map(()=>rnd(40,220)),
+    borderColor:colors[i], backgroundColor:'transparent',
+    borderWidth:1.5, pointRadius:2, tension:.4,
+    borderDash: i%2===0?[]:[5,3]
+  }));
+  charts.aqiChart=new Chart(ctx,{type:'line',data:{labels:months,datasets},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{y:{min:0,max:260,ticks:{font:{size:10}},grid:{color:'#f0f0f0'}},
+    x:{ticks:{font:{size:10}},grid:{color:'#f0f0f0'}}}}});
+  const leg=document.getElementById('aqi-legend');
+  leg.innerHTML=districts.slice(0,5).map((d,i)=>`<span class="leg-item"><span class="leg-dot" style="background:${colors[i]}"></span>${d}</span>`).join('');
+
+  destroyChart('energyDonut');
+  const dctx=document.getElementById('energyDonut');
+  const vals=[5000,8000,20000,3000,6000];
+  charts.energyDonut=new Chart(dctx,{type:'doughnut',data:{labels:sectors,datasets:[{data:vals,backgroundColor:sectorColors,borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'65%'}});
+  const total=vals.reduce((a,b)=>a+b,0);
+  document.getElementById('donut-legend').innerHTML=sectors.map((s,i)=>`<span class="leg-item"><span class="leg-dot" style="background:${sectorColors[i]}"></span>${s} ${Math.round(vals[i]/total*100)}%</span>`).join('');
+
+  destroyChart('trafficBar');
+  charts.trafficBar=new Chart(document.getElementById('trafficBar'),{type:'bar',
+    data:{labels:months,datasets:[{label:'Volume',data:months.map(()=>rnd(12000,48000)),backgroundColor:'#1a6bb5aa',borderColor:'#1a6bb5',borderWidth:1}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{font:{size:9},callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v},grid:{color:'#f0f0f0'}},x:{ticks:{font:{size:9}}}}}});
+
+  destroyChart('waterChart');
+  const supply=months.map(()=>rnd(15000,45000));
+  const demand=supply.map(s=>rnd(Math.floor(s*0.7),Math.floor(s*1.1)));
+  charts.waterChart=new Chart(document.getElementById('waterChart'),{type:'line',
+    data:{labels:months,datasets:[
+      {label:'Supply',data:supply,borderColor:'#1a6bb5',backgroundColor:'rgba(26,107,181,.1)',fill:true,tension:.4,pointRadius:2,borderWidth:1.5},
+      {label:'Demand',data:demand,borderColor:'#b03030',backgroundColor:'transparent',tension:.4,pointRadius:2,borderWidth:1.5,borderDash:[5,3]}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{font:{size:9},callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v},grid:{color:'#f0f0f0'}},x:{ticks:{font:{size:9}}}}}});
+
+  destroyChart('wasteChart');
+  const wRates=districts.map(()=>rnd(18,55));
+  charts.wasteChart=new Chart(document.getElementById('wasteChart'),{type:'bar',
+    data:{labels:districts.map(d=>d.replace(' Zone','').replace(' Area','')),datasets:[{label:'Recycle %',data:wRates,backgroundColor:wRates.map(v=>v>40?'#1a7a4a99':v>28?'#c0701099':'#b0303099'),borderWidth:0}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{min:0,max:60,ticks:{font:{size:9},callback:v=>v+'%'},grid:{color:'#f0f0f0'}},y:{ticks:{font:{size:9}}}}}});
+
+  const tbody=document.getElementById('districtTable');
+  tbody.innerHTML=districts.map(d=>{
+    const aqi=rnd(40,220),score=rnd(45,95),cong=rndf(.2,.95);
+    const aqiBadge=aqi<=100?'good':aqi<=150?'mod':'bad';
+    const aqiLabel=aqi<=100?'Good':aqi<=150?'Moderate':'Unhealthy';
+    const safeLabel=score>=70?'good':score>=55?'mod':'bad';
+    const congColor=cong<=.4?'#1a7a4a':cong<=.65?'#c07010':'#b03030';
+    return`<tr><td>${d}</td><td><span class="badge ${aqiBadge}">${aqi} ${aqiLabel}</span></td>
+    <td><div class="mini-bar-wrap"><div class="mini-bar-bg"><div class="mini-bar-fill" style="width:${score}%;background:#1a7a4a"></div></div><span style="font-size:10px;color:#555;min-width:24px">${score}</span></div></td>
+    <td><span style="font-size:11px;font-weight:500;color:${congColor}">${cong}</span></td>
+    <td><span class="badge ${safeLabel}">${score>=70?'Safe':score>=55?'Watch':'Alert'}</span></td></tr>`;
+  }).join('');
+
+  const iotTypes=['Air Quality','Traffic','Water','Energy','Waste','Weather'];
+  const online=iotTypes.map(()=>rnd(60,90));
+  const offline=iotTypes.map((_,i)=>100-online[i]);
+  document.getElementById('iot-stats').innerHTML=`<div class="stat-row"><span class="stat-label">Total Sensors</span><span class="stat-val">500</span></div><div class="stat-row"><span class="stat-label">Online</span><span class="stat-val" style="color:#1a7a4a">427 (85%)</span></div><div class="stat-row"><span class="stat-label">Offline/Maintenance</span><span class="stat-val" style="color:#b03030">73 (15%)</span></div>`;
+  destroyChart('iotChart');
+  charts.iotChart=new Chart(document.getElementById('iotChart'),{type:'bar',
+    data:{labels:iotTypes,datasets:[
+      {label:'Online',data:online,backgroundColor:'#1a7a4a99',borderWidth:0},
+      {label:'Offline',data:offline,backgroundColor:'#b0303099',borderWidth:0}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{stacked:true,ticks:{font:{size:9}}},y:{stacked:true,max:100,ticks:{font:{size:9},callback:v=>v+'%'},grid:{color:'#f0f0f0'}}}}});
+}
+
+function buildAir(){
+  destroyChart('aqiDistBar');
+  const aqiVals=districts.map(()=>rnd(50,240));
+  charts.aqiDistBar=new Chart(document.getElementById('aqiDistBar'),{type:'bar',
+    data:{labels:districts.map(d=>d.replace(' Zone','').replace(' Area','')),datasets:[{label:'AQI',data:aqiVals,backgroundColor:aqiVals.map(v=>v<=100?'#1a7a4a99':v<=150?'#c0701099':'#b0303099'),borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:280,ticks:{font:{size:10}}},x:{ticks:{font:{size:9},maxRotation:30}}}}});
+
+  destroyChart('pollChart');
+  charts.pollChart=new Chart(document.getElementById('pollChart'),{type:'radar',
+    data:{labels:['PM2.5','PM10','NO2','CO2','O3','SO2'],datasets:[
+      {label:'2024',data:[62,95,38,420,35,22],borderColor:'#1a6bb5',backgroundColor:'rgba(26,107,181,.15)',pointRadius:3,borderWidth:2},
+      {label:'2022',data:[75,110,44,445,40,28],borderColor:'#b03030',backgroundColor:'rgba(176,48,48,.1)',pointRadius:3,borderWidth:2,borderDash:[5,3]}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{ticks:{font:{size:9}},grid:{color:'#e0e0e0'},pointLabels:{font:{size:10}}}}}});
+
+  const hm=document.getElementById('aqiHeatmap');
+  const cellW=Math.floor(600/12);
+  let html=`<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:10px;width:100%"><thead><tr><th style="padding:3px 6px;text-align:left;background:#f0f3f7;font-weight:500;font-size:10px;position:sticky;left:0">District</th>${months.map(m=>`<th style="padding:3px 4px;background:#f0f3f7;text-align:center;font-weight:500;font-size:10px">${m}</th>`).join('')}</tr></thead><tbody>`;
+  districts.forEach(d=>{
+    html+=`<tr><td style="padding:3px 6px;font-size:10px;white-space:nowrap;position:sticky;left:0;background:#fff;border-right:1px solid #dde3ee">${d}</td>`;
+    months.forEach(()=>{
+      const v=rnd(30,260);
+      const bg=v<=50?'#d4f0e0':v<=100?'#b8e0c8':v<=150?'#ffeacc':v<=200?'#fdd0a0':'#f8b0b0';
+      const tc=v<=100?'#1a5a3a':v<=150?'#965500':'#8b1010';
+      html+=`<td style="padding:3px 4px;text-align:center;background:${bg};color:${tc};font-weight:500">${v}</td>`;
+    });
+    html+='</tr>';
+  });
+  html+='</tbody></table></div>';
+  hm.innerHTML=html;
+}
+
+function buildTraffic(){
+  destroyChart('congChart');
+  charts.congChart=new Chart(document.getElementById('congChart'),{type:'line',
+    data:{labels:months,datasets:[
+      {label:'2024',data:months.map(()=>rndf(.3,.9)),borderColor:'#1a6bb5',backgroundColor:'rgba(26,107,181,.1)',fill:true,tension:.4,pointRadius:3,borderWidth:2},
+      {label:'2023',data:months.map(()=>rndf(.25,.85)),borderColor:'#c07010',backgroundColor:'transparent',tension:.4,pointRadius:2,borderWidth:1.5,borderDash:[5,3]}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:1.1,ticks:{font:{size:10}}},x:{ticks:{font:{size:10}}}}}});
+
+  destroyChart('accChart');
+  charts.accChart=new Chart(document.getElementById('accChart'),{type:'bar',
+    data:{labels:districts.map(d=>d.replace(' Zone','').replace(' Area','')),datasets:[{label:'Accidents',data:districts.map(()=>rnd(200,900)),backgroundColor:'#b0303099',borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{font:{size:10}}},x:{ticks:{font:{size:9},maxRotation:30}}}}});
+
+  destroyChart('scatterChart');
+  const pts=districts.map((d,i)=>({x:rnd(5000,50000),y:rndf(15,85),label:d}));
+  charts.scatterChart=new Chart(document.getElementById('scatterChart'),{type:'scatter',
+    data:{datasets:pts.map((p,i)=>({label:p.label,data:[{x:p.x,y:p.y}],backgroundColor:colors[i],pointRadius:8,pointHoverRadius:10}))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{title:{display:true,text:'Traffic Volume (vehicles/day)',font:{size:10}},ticks:{font:{size:9},callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v}},
+    y:{title:{display:true,text:'Avg Speed (km/h)',font:{size:10}},ticks:{font:{size:9}}}}}});
+}
+
+function buildEnergy(){
+  destroyChart('energyStack');
+  const sData=sectors.map(()=>months.map(()=>rnd(3000,25000)));
+  charts.energyStack=new Chart(document.getElementById('energyStack'),{type:'bar',
+    data:{labels:months,datasets:sectors.map((s,i)=>({label:s,data:sData[i],backgroundColor:sectorColors[i]+'cc',borderWidth:0}))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{stacked:true,ticks:{font:{size:9}}},y:{stacked:true,ticks:{font:{size:9},callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v},grid:{color:'#f0f0f0'}}}}});
+  document.getElementById('energy-legend').innerHTML=sectors.map((s,i)=>`<span class="leg-item"><span class="leg-dot" style="background:${sectorColors[i]}"></span>${s}</span>`).join('');
+
+  destroyChart('solarChart');
+  const grid=months.map(()=>rnd(40000,90000));
+  const solar=grid.map(g=>rnd(Math.floor(g*.1),Math.floor(g*.35)));
+  charts.solarChart=new Chart(document.getElementById('solarChart'),{type:'line',
+    data:{labels:months,datasets:[
+      {label:'Grid',data:grid,borderColor:'#b03030',backgroundColor:'rgba(176,48,48,.1)',fill:true,tension:.4,pointRadius:2,borderWidth:2},
+      {label:'Solar',data:solar,borderColor:'#c07010',backgroundColor:'rgba(192,112,16,.15)',fill:true,tension:.4,pointRadius:2,borderWidth:2,borderDash:[4,2]}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{font:{size:9},callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v},grid:{color:'#f0f0f0'}},x:{ticks:{font:{size:9}}}}}});
+}
+
+function buildSafety(){
+  destroyChart('safetyBar');
+  const scores=districts.map(()=>rnd(42,94));
+  charts.safetyBar=new Chart(document.getElementById('safetyBar'),{type:'bar',
+    data:{labels:districts.map(d=>d.replace(' Zone','').replace(' Area','')),datasets:[{label:'Safety Score',data:scores,backgroundColor:scores.map(v=>v>=70?'#1a7a4a99':v>=55?'#c0701099':'#b0303099'),borderWidth:0}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{min:0,max:100,ticks:{font:{size:9}}},y:{ticks:{font:{size:9}}}}}});
+
+  destroyChart('incChart');
+  const inc=months.map(()=>rnd(200,600));
+  const res=inc.map(v=>rnd(Math.floor(v*.4),Math.floor(v*.9)));
+  charts.incChart=new Chart(document.getElementById('incChart'),{type:'line',
+    data:{labels:months,datasets:[
+      {label:'Incidents',data:inc,borderColor:'#b03030',backgroundColor:'transparent',tension:.4,pointRadius:3,borderWidth:2},
+      {label:'Resolved',data:res,borderColor:'#1a7a4a',backgroundColor:'rgba(26,122,74,.1)',fill:true,tension:.4,pointRadius:3,borderWidth:2,borderDash:[5,3]}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{font:{size:10}}},x:{ticks:{font:{size:10}}}}}});
+}
+
+function switchTab(name, btn){
+  ['overview','air','traffic','energy','safety'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display='none';
+  });
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).style.display='block';
+  btn.classList.add('active');
+  if(name==='air')buildAir();
+  else if(name==='traffic')buildTraffic();
+  else if(name==='energy')buildEnergy();
+  else if(name==='safety')buildSafety();
+  else buildOverview();
+}
+
+function updateDash(){
+  const yr=document.getElementById('f-year').value;
+  document.getElementById('aqi-subtitle').textContent=yr==='All Years'?'All Years':yr;
+  buildOverview();
+}
+
+buildOverview();
+</script>
